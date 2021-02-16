@@ -26,6 +26,9 @@ SET(STRING_C_FLAGS "")
 IF(WIN32)
 	#Windows, Unicode and disable RTTI
 	SET(STRING_CXX_FLAGS "${STRING_CXX_FLAGS} -D_UNICODE /GR- ${STRING_CPP_VERSION}")
+	#Using UTF8 strings (char*) in assemblies
+	SET(STRING_CXX_FLAGS "${STRING_CXX_FLAGS} /execution-charset:utf-8")
+	#C flags
 	SET(STRING_C_FLAGS "${STRING_CXX_FLAGS}")
 ELSE(WIN32)
 	#Linux, hide all functions and disable RTTI

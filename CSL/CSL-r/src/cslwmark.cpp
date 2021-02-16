@@ -29,8 +29,6 @@ WmarkUtility::~WmarkUtility() throw()
 
 bool WmarkUtility::Initialize()
 {
-	//actions
-	WmarkScannerHelper::CreateActions(m_spTkAction, m_spCommentAction, m_spTextAction);
 	//table
 	return WmarkParserHelper::CreateTable(m_spTable);
 }
@@ -45,21 +43,20 @@ WmarkParser::~WmarkParser() throw()
 {
 }
 
-void WmarkParser::Initialize(uint32_t uMaxErrorNumber, const std::shared_ptr<WmarkUtility>& spU)
+void WmarkParser::Initialize(uint32_t uMaxErrorNumber, const WmarkUtility& wu)
 {
 	//scanner
 	m_spScanner = std::make_shared<RdScanner>();
-	WmarkScannerHelper::SetActions(*m_spScanner, spU->m_spTkAction, spU->m_spCommentAction, spU->m_spTextAction);
+	WmarkScannerHelper::InitActions(*m_spScanner);
+	m_spScanner->SetStartAction(WMARK_SCANNER_TK_ACTION);
 	//parser
 	m_parser.SetScanner(m_spScanner);
-	m_parser.SetTable(spU->m_spTable);
+	m_parser.SetTable(wu.m_spTable);
 	//data
 	m_data.posParent.uAddress = 0;
 	m_data.posCurrent.uAddress = 0;
 	//actions
-	WmarkParserHelper::InitActions(m_parser, &m_data);
-	//utility
-	m_spUtility = spU;
+	WmarkParserHelper::InitActions(m_parser, m_data);
 	//error number
 	m_uMaxErrorNumber = uMaxErrorNumber;
 }
@@ -78,15 +75,14 @@ void WmarkParser::SetOutput(const std::shared_ptr<RdMetaData>& spMeta) throw()
 
 void WmarkParser::Start()
 {
-	WmarkParserHelper::Start(m_parser);
+	m_parser.Start();
 	m_data.posParent.uAddress = 0;
 	m_data.posCurrent.uAddress = 0;
 }
 
 int32_t WmarkParser::Parse()
 {
-	bool bEmpty;
-	int32_t iRet = m_parser.Parse(bEmpty);
+	int32_t iRet = m_parser.Parse();
 	if( iRet == -1 ) {
 		if( !m_parser.Revert() )
 			return -1;

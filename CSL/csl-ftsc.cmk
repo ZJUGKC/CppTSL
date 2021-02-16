@@ -1,0 +1,57 @@
+#
+# Xin YUAN, 2021, BSD (2)
+#
+
+# File To Source Code
+
+# strRoot: tail is /
+MACRO(SET_FILES_TO_SOURCE_CODE targetName strRoot isCpp fileList)
+	SET(_source_files "${ARGN}")
+	LIST(APPEND _source_files ${fileList})
+	# command name
+	IF(WIN32)
+		SET(_cmd_name "${strRoot}aux-bin/windows/x64/file2code")
+	ELSE(WIN32)
+		SET(_cmd_name "${strRoot}aux-bin/linux/x64/file2code")
+	ENDIF(WIN32)
+	# destination directory
+	SET(_dest_dir "${CMAKE_CURRENT_BINARY_DIR}/ftsc")
+	ADD_CUSTOM_COMMAND(OUTPUT ${_dest_dir}
+					COMMAND mkdir ${_dest_dir})
+	# options
+	IF(${isCpp})
+		SET(_ftsc_option "-cpp")
+		SET(_ftsc_ext ".cpp")
+	ELSE(${isCpp})
+		SET(_ftsc_option "-c")
+		SET(_ftsc_ext ".c")
+	ENDIF(${isCpp})
+	# each file
+	SET(_h_files "")
+	SET(_gen_files "")
+	FOREACH(_file ${_source_files})
+		SET(_input "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
+		IF(WIN32)
+			STRING(REPLACE "/" "\\\\" _input ${_input})
+		ENDIF(WIN32)
+		STRING(REPLACE "/" "_" _dest_file ${_file})
+		STRING(REPLACE "." "_" _dest_file ${_dest_file})
+		SET(_output "${_dest_dir}/${_dest_file}")
+		IF(WIN32)
+			STRING(REPLACE "/" "\\\\" _output ${_output})
+		ENDIF(WIN32)
+		ADD_CUSTOM_COMMAND(OUTPUT "${_output}.h" "${_output}${_ftsc_ext}"
+						COMMAND ${_cmd_name} ${_ftsc_option} ${_input} ${_output}
+						DEPENDS ${_input} ${_dest_dir})
+		LIST(APPEND _h_files "${_output}.h")
+		LIST(APPEND _gen_files "${_output}${_ftsc_ext}")
+	ENDFOREACH(_file)
+	# target
+	ADD_CUSTOM_TARGET(${targetName}_ftsc DEPENDS ${_dest_dir} ${_h_files} ${_gen_files})
+	ADD_DEPENDENCIES(${targetName} ${targetName}_ftsc)
+	# add generated source files
+	SET_SOURCE_FILES_PROPERTIES(${_gen_files} PROPERTIES GENERATED TRUE)
+	TARGET_SOURCES(${targetName} PUBLIC ${_gen_files})
+ENDMACRO(SET_FILES_TO_SOURCE_CODE)
+
+# end

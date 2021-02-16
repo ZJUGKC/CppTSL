@@ -18,19 +18,19 @@ namespace CSL {
 
 // TkCommentAction
 
-RdParserAction WmarkParserHelper::get_TkCommentAction(RdParserActionMetaData* pData)
+RdParserAction WmarkParserHelper::get_TkCommentAction(RdParserActionMetaData& data)
 {
-	return [pData](const std::string& strToken, std::vector<std::string>& vecError)->bool
+	return [&data](const std::string& strToken, std::vector<std::string>& vecError)->bool
 			{
 				//comment
-				assert( pData->posParent.uAddress != 0 );
-				RdMetaDataPosition pos = pData->spMeta->InsertAstNode(WMARK_NODETYPE_COMMENT);
-				pData->spMeta->SetAstParent(pos, pData->posParent);
-				if( pData->posCurrent.uAddress == 0 )
-					pData->spMeta->SetAstChild(pData->posParent, pos);
+				assert( data.posParent.uAddress != 0 );
+				RdMetaDataPosition pos = data.spMeta->InsertAstNode(WMARK_NODETYPE_COMMENT);
+				data.spMeta->SetAstParent(pos, data.posParent);
+				if( data.posCurrent.uAddress == 0 )
+					data.spMeta->SetAstChild(data.posParent, pos);
 				else
-					pData->spMeta->SetAstNext(pData->posCurrent, pos);
-				pData->posCurrent = pos;
+					data.spMeta->SetAstNext(data.posCurrent, pos);
+				data.posCurrent = pos;
 				return true;
 			};
 }

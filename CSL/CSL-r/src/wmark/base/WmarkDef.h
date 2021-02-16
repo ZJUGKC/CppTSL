@@ -13,14 +13,14 @@ namespace CSL {
 
 //Action IDs for scanner
 enum {
-	WMARK_SCANNER_TK_ACTION = 1,
+	WMARK_SCANNER_TK_ACTION = LA_START,
 	WMARK_SCANNER_COMMENT_ACTION,
 	WMARK_SCANNER_TEXT_ACTION
 };
 
 //Token IDs
 enum {
-	WMARK_TK_RETURN = 1,
+	WMARK_TK_RETURN = TK_START,
 	WMARK_TK_COMMENT,
 	WMARK_TK_INDENT,
 	WMARK_TK_TEXT,
@@ -43,7 +43,7 @@ enum {
 
 //actions for parser
 enum {
-	WMARK_PARSER_ACT_program = 1,
+	WMARK_PARSER_ACT_program = LA_START,
 	WMARK_PARSER_ACT_TK_COMMENT,
 	WMARK_PARSER_ACT_block_element,
 	WMARK_PARSER_ACT_berr_tail,

@@ -32,18 +32,20 @@ void RdScanner::ClearActions() throw()
 	m_map.clear();
 }
 
-void RdScanner::AddAction(uint32_t uActionID, const std::shared_ptr<RdScannerAction>& spAction)
+void RdScanner::AddAction(uint32_t uActionID, RdScannerAction&& rsa)
 {
-	m_map.insert(std::pair<uint32_t, std::shared_ptr<RdScannerAction>>(uActionID, spAction));
+	m_map.insert(std::pair<uint32_t, RdScannerAction>(uActionID, std::move(rsa)));
 }
 
-void RdScanner::Start(uint32_t uStartAction, RdToken& token) throw()
+void RdScanner::SetStartAction(uint32_t uStartAction) throw()
+{
+	m_uStartAction = uStartAction;
+}
+
+void RdScanner::Start(RdToken& token) throw()
 {
 	assert( m_spStream.get() != NULL );
 	//clear
-	while( !m_stack.empty() )
-		m_stack.pop();
-	m_uStartAction = uStartAction;
 	token.infoStart.uRow = token.infoStart.uCol = 0;
 	token.infoEnd.uRow = token.infoEnd.uCol = 0;
 }
@@ -51,17 +53,17 @@ void RdScanner::Start(uint32_t uStartAction, RdToken& token) throw()
 bool RdScanner::GetToken(RdToken& token)
 {
 	assert( m_spStream.get() != NULL );
-	token.uID = TK_ERROR;
+	token.uID = TK_NULL;
 	token.strToken.clear();
 	token.infoStart = token.infoEnd;
-	m_stack.push(m_uStartAction);
+	uint32_t uNextAction = m_uStartAction;
 	//loop
-	while( !m_stack.empty() ) {
-		uint32_t uActionID = m_stack.top();
-		m_stack.pop();
+	while( uNextAction != LA_NULL ) {
+		uint32_t uActionID = uNextAction;
+		uNextAction = LA_NULL;
 		auto it(m_map.find(uActionID));
 		assert( it != m_map.end() );
-		bool bRet = (*(it->second.get()))(*(m_spStream.get()), m_stack, token);
+		bool bRet = it->second(*(m_spStream.get()), uNextAction, token);
 		if( !bRet )
 			return false;
 	}
@@ -70,7 +72,7 @@ bool RdScanner::GetToken(RdToken& token)
 
 // RdaTable
 
-RdaTable::RdaTable() throw() : m_uStartNT(TK_NULL)
+RdaTable::RdaTable() throw() : m_uStartNT(TK_NULL), m_uMaxTerminalID(TK_START)
 {
 }
 
@@ -388,6 +390,8 @@ bool RdaTable::Generate(const RULEELEMENT* pRules, uint32_t uMaxTerminalID)
 	if( !add_follow_set(uMaxTerminalID) )
 		return false;
 
+	m_uMaxTerminalID = uMaxTerminalID;
+
 	return true;
 }
 
@@ -396,7 +400,12 @@ uint32_t RdaTable::GetStartNT() const throw()
 	return m_uStartNT;
 }
 
-int32_t RdaTable::Input(uint32_t uNonterminal, uint32_t uTerminal) throw()
+uint32_t RdaTable::GetMaxTerminalID() const throw()
+{
+	return m_uMaxTerminalID;
+}
+
+int32_t RdaTable::Input(uint32_t uNonterminal, uint32_t uTerminal) const throw()
 {
 	auto iterN(m_map.find(uNonterminal));
 	if( iterN == m_map.end() )
@@ -419,6 +428,8 @@ void RdaTable::GetRule(uintptr_t index, RULEITEM& item) const throw()
 }
 
 // RdParser
+
+#define TK_NO_EVENT      ((uint32_t)-3)
 
 RdParser::RdParser() throw() : m_uMaxTerminalID(TK_NULL)
 {
@@ -455,10 +466,10 @@ void RdParser::SetAcceptedAction(RdParserAction&& rpa) throw()
 	m_rpaAccepted = std::move(rpa);
 }
 
-void RdParser::Start(uint32_t uScannerStartAction, uint32_t uMaxTerminalID)
+void RdParser::Start()
 {
-	m_uMaxTerminalID = uMaxTerminalID;
-	m_spScanner->Start(uScannerStartAction, m_token);
+	m_uMaxTerminalID = m_spTable->GetMaxTerminalID();
+	m_spScanner->Start(m_token);
 	m_vecError.clear();
 	while( !m_stack.empty() )
 		m_stack.pop();
@@ -473,13 +484,14 @@ void RdParser::Start(uint32_t uScannerStartAction, uint32_t uMaxTerminalID)
 //internal
 void RdParser::append_unexpected_error()
 {
+	//format
 	char tmp[1024];
 	::snprintf(tmp, sizeof(tmp), "Error [%u, %u] [%s] :",
 			m_token.infoStart.uRow + 1, m_token.infoStart.uCol,
 			m_token.strToken.c_str());
-	std::string str(tmp);
-	str += "unexpected.";
-	m_vecError.push_back(std::move(str));
+	std::string strTmp(tmp);
+	strTmp += " unexpected.";
+	m_vecError.push_back(std::move(strTmp));
 }
 bool RdParser::do_action(uint32_t uActionID)
 {
@@ -495,7 +507,7 @@ bool RdParser::do_action(uint32_t uActionID)
 	return true;
 }
 
-int32_t RdParser::Parse(bool& bEmpty)
+int32_t RdParser::Parse()
 {
 	//loop
 	while( true ) {

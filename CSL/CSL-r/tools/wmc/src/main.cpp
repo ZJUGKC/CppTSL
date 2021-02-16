@@ -28,6 +28,8 @@ void _print_help()
 
 int main(int argc, char* argv[])
 {
+	CSL::ConsoleEncoding ce;
+
 	if( argc < 4 ) {
 		_print_help();
 		return 1;

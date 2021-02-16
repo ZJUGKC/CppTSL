@@ -12,7 +12,7 @@ INCLUDE_DIRECTORIES(
 	"${PROJECT_SOURCE_DIR}/tools/wmc/src"
 	)
 
-SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
+SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/tools-bin")
 SET(SRC_PCH_LIST "precomp.cpp")
 SET(SRC_LIST "src/main.cpp" "src/ProcessFile.cpp"
 	)

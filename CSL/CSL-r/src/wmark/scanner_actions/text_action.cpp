@@ -20,7 +20,7 @@ namespace CSL {
 
 RdScannerAction WmarkScannerHelper::get_TextAction()
 {
-	return [](std::istream& stm, RdActionStack& stk, RdToken& token)->bool
+	return [](std::istream& stm, uint32_t& next, RdToken& token)->bool
 			{
 				do {
 					//get a character

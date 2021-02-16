@@ -28,11 +28,6 @@ public:
 	bool Initialize();
 
 private:
-	//actions
-	std::shared_ptr<RdScannerAction>  m_spTkAction;
-	std::shared_ptr<RdScannerAction>  m_spCommentAction;
-	std::shared_ptr<RdScannerAction>  m_spTextAction;
-
 	//table
 	std::shared_ptr<RdaTable>  m_spTable;
 
@@ -50,7 +45,7 @@ public:
 	WmarkParser& operator=(const WmarkParser&) = delete;
 	~WmarkParser() throw();
 
-	void Initialize(uint32_t uMaxErrorNumber, const std::shared_ptr<WmarkUtility>& spU);
+	void Initialize(uint32_t uMaxErrorNumber, const WmarkUtility& wu);
 	void SetInput(const std::shared_ptr<std::istream>& spStream) throw();
 	void SetOutput(const std::shared_ptr<RdMetaData>& spMeta) throw();
 	void Start();
@@ -59,7 +54,6 @@ public:
 	const std::vector<std::string>& GetErrorArray() const throw();
 
 private:
-	std::shared_ptr<WmarkUtility> m_spUtility;
 	uint32_t m_uMaxErrorNumber;
 
 	//scanner

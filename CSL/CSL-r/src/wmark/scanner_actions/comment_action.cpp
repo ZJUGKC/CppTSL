@@ -20,7 +20,7 @@ namespace CSL {
 
 RdScannerAction WmarkScannerHelper::get_CommentAction()
 {
-	return [](std::istream& stm, RdActionStack& stk, RdToken& token)->bool
+	return [](std::istream& stm, uint32_t& next, RdToken& token)->bool
 			{
 				int iState = 1;
 				do {
@@ -42,21 +42,21 @@ RdScannerAction WmarkScannerHelper::get_CommentAction()
 					switch( iState ) {
 					case 1:
 						if( ch != '!' ) {
-							stk.push(WMARK_SCANNER_TEXT_ACTION);
+							next = WMARK_SCANNER_TEXT_ACTION;
 							return true;
 						}
 						iState = 2;
 						break;
 					case 2:
 						if( ch != '-' ) {
-							stk.push(WMARK_SCANNER_TEXT_ACTION);
+							next = WMARK_SCANNER_TEXT_ACTION;
 							return true;
 						}
 						iState = 3;
 						break;
 					case 3:
 						if( ch != '-' ) {
-							stk.push(WMARK_SCANNER_TEXT_ACTION);
+							next = WMARK_SCANNER_TEXT_ACTION;
 							return true;
 						}
 						iState = 4;

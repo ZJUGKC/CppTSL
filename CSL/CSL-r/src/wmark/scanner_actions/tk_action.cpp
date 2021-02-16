@@ -20,7 +20,7 @@ namespace CSL {
 
 RdScannerAction WmarkScannerHelper::get_TkAction()
 {
-	return [](std::istream& stm, RdActionStack& stk, RdToken& token)->bool
+	return [](std::istream& stm, uint32_t& next, RdToken& token)->bool
 			{
 				//get a character
 				char ch;
@@ -72,12 +72,12 @@ RdScannerAction WmarkScannerHelper::get_TkAction()
 
 				//<
 				if( ch == '<' ) {
-					stk.push(WMARK_SCANNER_COMMENT_ACTION);
+					next = WMARK_SCANNER_COMMENT_ACTION;
 					return true;
 				}
 
 				//others
-				stk.push(WMARK_SCANNER_TEXT_ACTION);
+				next = WMARK_SCANNER_TEXT_ACTION;
 
 				return true;
 			};

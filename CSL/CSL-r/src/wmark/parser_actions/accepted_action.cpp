@@ -18,17 +18,17 @@ namespace CSL {
 
 // AcceptedAction
 
-RdParserAction WmarkParserHelper::get_AcceptedAction(RdParserActionMetaData* pData)
+RdParserAction WmarkParserHelper::get_AcceptedAction(RdParserActionMetaData& data)
 {
-	return [pData](const std::string& strToken, std::vector<std::string>& vecError)->bool
+	return [&data](const std::string& strToken, std::vector<std::string>& vecError)->bool
 			{
 				//symbol
-				RdMetaDataPosition pos = pData->spMeta->InsertSymbol(WMARK_ROOT_SYMBOL, 0, true);
-				RdMetaDataPosition posData = pData->spMeta->InsertData(sizeof(RdMetaDataPosition));
-				*((RdMetaDataPosition*)(pData->spMeta->GetData(posData))) = pData->spMeta->GetAstStart();
-				pData->spMeta->SetData(pos, posData);
+				RdMetaDataPosition pos = data.spMeta->InsertSymbol(WMARK_ROOT_SYMBOL, 0, true);
+				RdMetaDataPosition posData = data.spMeta->InsertData(sizeof(RdMetaDataPosition));
+				*((RdMetaDataPosition*)(data.spMeta->GetData(posData))) = data.spMeta->GetAstStart();
+				data.spMeta->SetData(pos, posData);
 				//finish
-				pData->spMeta->FinishZeroLevel(true);
+				data.spMeta->FinishZeroLevel(true);
 				return true;
 			};
 }

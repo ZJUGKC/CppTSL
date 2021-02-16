@@ -18,8 +18,14 @@ bool ProcessOneFile(const char* szSrc, const char* szDest)
 {
 	//input
 	std::shared_ptr<std::ifstream> spSrc(std::make_shared<std::ifstream>(szSrc, std::ifstream::in | std::ifstream::binary));
+	if( !spSrc->is_open() ) {
+		std::cout << "Error: the source file cannot be opened!" << std::endl;
+		return false;
+	}
+
 	//UTF8 BOM
-	StreamHelper::CheckBOM_UTF8(*spSrc);
+	if( !StreamHelper::CheckBOM_UTF8(*spSrc) )
+		std::cout << "Info: the source file has not an UTF8 BOM." << std::endl;
 
 	//output
 	std::shared_ptr<RdMetaData> spMeta(std::make_shared<RdMetaData>());
@@ -31,7 +37,7 @@ bool ProcessOneFile(const char* szSrc, const char* szDest)
 		return false;
 	}
 	WmarkParser parser;
-	parser.Initialize(100, spU);
+	parser.Initialize(100, *spU);
 	parser.SetInput(std::static_pointer_cast<std::istream, std::ifstream>(spSrc));
 	parser.SetOutput(spMeta);
 	parser.Start();

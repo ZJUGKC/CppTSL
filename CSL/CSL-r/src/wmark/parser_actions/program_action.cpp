@@ -18,17 +18,17 @@ namespace CSL {
 
 // ProgramAction
 
-RdParserAction WmarkParserHelper::get_ProgramAction(RdParserActionMetaData* pData)
+RdParserAction WmarkParserHelper::get_ProgramAction(RdParserActionMetaData& data)
 {
-	return [pData](const std::string& strToken, std::vector<std::string>& vecError)->bool
+	return [&data](const std::string& strToken, std::vector<std::string>& vecError)->bool
 			{
 				//root
-				if( pData->posParent.uAddress == 0 && pData->posCurrent.uAddress == 0 ) {
-					RdMetaDataPosition pos = pData->spMeta->InsertAstNode(WMARK_NODETYPE_ROOT);
-					RdMetaDataPosition posRoot = pData->spMeta->GetAstRoot(pData->spMeta->GetAstStart());
-					pData->spMeta->SetAstParent(pos, posRoot);
-					pData->spMeta->SetAstChild(posRoot, pos);
-					pData->posParent = pos;
+				if( data.posParent.uAddress == 0 && data.posCurrent.uAddress == 0 ) {
+					RdMetaDataPosition pos = data.spMeta->InsertAstNode(WMARK_NODETYPE_ROOT);
+					RdMetaDataPosition posRoot = data.spMeta->GetAstRoot(data.spMeta->GetAstStart());
+					data.spMeta->SetAstParent(pos, posRoot);
+					data.spMeta->SetAstChild(posRoot, pos);
+					data.posParent = pos;
 				}
 				return true;
 			};

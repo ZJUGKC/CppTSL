@@ -16,13 +16,7 @@ namespace CSL {
 class WmarkScannerHelper
 {
 public:
-	static void CreateActions(std::shared_ptr<RdScannerAction>& spTkAction,
-							std::shared_ptr<RdScannerAction>& spCommentAction,
-							std::shared_ptr<RdScannerAction>& spTextAction);
-	static void SetActions(RdScanner& rds,
-						const std::shared_ptr<RdScannerAction>& spTkAction,
-						const std::shared_ptr<RdScannerAction>& spCommentAction,
-						const std::shared_ptr<RdScannerAction>& spTextAction);
+	static void InitActions(RdScanner& rds);
 
 private:
 	static RdScannerAction get_TkAction();

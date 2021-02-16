@@ -18,16 +18,16 @@ namespace CSL {
 
 // BerrTailAction
 
-RdParserAction WmarkParserHelper::get_BerrTailAction(RdParserActionMetaData* pData)
+RdParserAction WmarkParserHelper::get_BerrTailAction(RdParserActionMetaData& data)
 {
-	return [pData](const std::string& strToken, std::vector<std::string>& vecError)->bool
+	return [&data](const std::string& strToken, std::vector<std::string>& vecError)->bool
 			{
 				//up
-				assert( pData->posParent.uAddress != 0 );
+				assert( data.posParent.uAddress != 0 );
 				RdMetaAstNodeInfo info;
-				pData->spMeta->GetAstNodeInfo(pData->posParent, info);
-				pData->posCurrent = pData->posParent;
-				pData->posParent = info.posParent;
+				data.spMeta->GetAstNodeInfo(data.posParent, info);
+				data.posCurrent = data.posParent;
+				data.posParent = info.posParent;
 				return true;
 			};
 }

@@ -26,7 +26,9 @@ namespace CSL {
 #define TK_END_OF_EVENT  ((uint32_t)-2)
 #define TK_START         (1)
 
-#define TK_NO_EVENT      ((uint32_t)-3)
+//LL actions
+#define LA_NULL     (0)
+#define LA_START    (1)
 
 // RdCharInfo
 struct RdCharInfo
@@ -44,12 +46,9 @@ struct RdToken
 	RdCharInfo infoEnd;
 };
 
-// action stack
-typedef std::stack<uint32_t>  RdActionStack;
-
 // scanner action
-//   [](std::istream& stm, RdActionStack& stk, RdToken& token)->bool
-typedef std::function<bool(std::istream&, RdActionStack&, RdToken&)>  RdScannerAction;
+//   [](std::istream& stm, uint32_t& next, RdToken& token)->bool
+typedef std::function<bool(std::istream&, uint32_t&, RdToken&)>  RdScannerAction;
 
 // RdScanner
 class RdScanner
@@ -62,23 +61,19 @@ public:
 
 	void SetStream(const std::shared_ptr<std::istream>& spStream) throw();
 	void ClearActions() throw();
-	void AddAction(uint32_t uActionID, const std::shared_ptr<RdScannerAction>& spAction);
-	void Start(uint32_t uStartAction, RdToken& token) throw();
+	void AddAction(uint32_t uActionID, RdScannerAction&& rsa);
+	void SetStartAction(uint32_t uStartAction) throw();
+	void Start(RdToken& token) throw();
 	bool GetToken(RdToken& token);
 
 private:
 	//map: <action id, action>
-	std::map<uint32_t, std::shared_ptr<RdScannerAction>>  m_map;
+	std::map<uint32_t, RdScannerAction>  m_map;
 	//stream
 	std::shared_ptr<std::istream>  m_spStream;
-	//stack
-	RdActionStack  m_stack;
 	//start action
 	uint32_t m_uStartAction;
 };
-
-//LL actions
-#define LA_NULL     (0)
 
 //rule table
 typedef struct _tagRuleElement
@@ -119,9 +114,10 @@ public:
 
 	//tools
 	uint32_t GetStartNT() const throw();
+	uint32_t GetMaxTerminalID() const throw();
 
 	//return value: > 0 (push rule no) = 0 (error) < 0 (pop rule no)
-	int32_t Input(uint32_t uNonterminal, uint32_t uTerminal) throw();
+	int32_t Input(uint32_t uNonterminal, uint32_t uTerminal) const throw();
 
 	void GetRule(uintptr_t index, RULEITEM& item) const throw();
 
@@ -137,6 +133,8 @@ private:
 	std::vector<RULEITEM> m_rules;
 	//start symbol
 	uint32_t m_uStartNT;
+	//maximum terminal ID
+	uint32_t m_uMaxTerminalID;
 };
 
 // parser action
@@ -157,9 +155,9 @@ public:
 	void ClearActions() throw();
 	void AddAction(uint32_t uActionID, RdParserAction&& rpa);
 	void SetAcceptedAction(RdParserAction&& rpa) throw();
-	void Start(uint32_t uScannerStartAction, uint32_t uMaxTerminalID);
+	void Start();
 	//return value: < 0 (error, -1 means it can be reverted), = 0 (end), > 0 (succeeded)
-	int32_t Parse(bool& bEmpty);
+	int32_t Parse();
 	bool Revert();
 
 	//info

@@ -9,9 +9,14 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include <io.h>
+#include <direct.h>
 #else
 #include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <iconv.h>
 #endif
 
 #include <cstdint>
@@ -26,7 +31,6 @@
 #include <set>
 
 #include <string>
-#include <codecvt>
 #include <cwchar>
 #include <locale>
 
@@ -157,7 +161,8 @@ private:
 class SafeOperators
 {
 public:
-	//T : unsigned integer types
+	//T : unsigned integer type
+	// or signed integer type with value >= 0
 	template <typename T>
 	static bool Add(T left, T right, T& result) noexcept
 	{
@@ -198,21 +203,48 @@ public:
 	}
 };
 
+//console
+
+#ifdef WIN32
+class ConsoleEncoding
+{
+public:
+	ConsoleEncoding(UINT uCP = CP_UTF8) noexcept;
+	~ConsoleEncoding() noexcept;
+
+private:
+	UINT m_uInput, m_uOutput;
+};
+#else
+class ConsoleEncoding
+{
+public:
+	ConsoleEncoding(uint32_t uCP = 0) noexcept;
+	~ConsoleEncoding() noexcept;
+};
+#endif
+
 //code convert
 
 class CodeConvertHelper
 {
 public:
-	// Ansi -> wstring
-	static void AnsiToWide(const char* sz1, std::wstring& str2);
-	// wstring -> Ansi
-	static void WideToAnsi(const wchar_t* sz1, std::string& str2);
 	// UTF8 -> wstring
-	static void UTF8ToWide(const char* sz1, std::wstring& str2);
-	static void UTF8ToWide(const std::string& str1, std::wstring& str2);
+	static bool UTF8ToWide(const char* sz, size_t len, std::wstring& str);
+	static bool UTF8ToWide(const char* sz, std::wstring& str);
+	static bool UTF8ToWide(const std::string& str1, std::wstring& str2);
 	// wstring -> UTF8
-	static void WideToUTF8(const wchar_t* wsz1, std::string& str2);
-	static void WideToUTF8(const std::wstring& str1, std::string& str2);
+	static bool WideToUTF8(const wchar_t* wsz, size_t len, std::string& str);
+	static bool WideToUTF8(const wchar_t* wsz, std::string& str);
+	static bool WideToUTF8(const std::wstring& str1, std::string& str2);
+};
+
+//environment variables
+
+class EnvironmentVariableHelper
+{
+public:
+	static bool Get(const char* szName, std::string& str);
 };
 
 //path
@@ -227,7 +259,7 @@ class FsPathHelper
 {
 public:
 	static void ToPlatform(char* szBuffer) throw();
-	static const char* GetHomeDirectory() throw();
+	static bool GetHomeDirectory(std::string& str);
 	static bool GetExePathName(std::string& str);
 
 	static bool IsDriveSeparator(char ch) noexcept;
@@ -235,6 +267,20 @@ public:
 	static void AppendSeparator(std::string& str);
 	static void RemoveSeparator(std::string& str);
 	static size_t FindFilePart(const char* szPath) noexcept;
+	static bool FindExtensionStart(const char* szPath, size_t& uPos) noexcept;
+};
+
+//file system
+
+class FsOpHelper
+{
+public:
+	static bool CheckFileExists(const char* sz) noexcept;
+	static bool CheckDirectoryExists(const char* sz) noexcept;
+	static bool DeleteFile(const char* sz) noexcept;
+	static bool DeleteDirectory(const char* sz) noexcept;
+	static bool CreateDirectory(const char* sz) noexcept;
+	static bool Rename(const char* szOld, const char* szNew) noexcept;
 };
 
 //stream
@@ -411,6 +457,16 @@ private:
 	std::map<int32_t, std::shared_ptr<IStateBase>> m_map;
 };
 */
+
+//------------------------------------------------------------------------------
+// resource
+
+struct ResourceItem
+{
+	const uint8_t* data;
+};
+
+//------------------------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////
 }

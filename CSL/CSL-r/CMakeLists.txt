@@ -13,6 +13,8 @@ ADD_DEFINITIONS(${STRING_CXX_FLAGS})
 
 ADD_SUBDIRECTORY(src src)
 
+ADD_SUBDIRECTORY(auxiliary auxiliary)
+
 ADD_SUBDIRECTORY(tools tools)
 
 # end

@@ -70,28 +70,23 @@ bool WmarkParserHelper::CreateTable(std::shared_ptr<RdaTable>& spTable)
 	return spTable->Generate(g_Rules, WMARK_TK_MAX);
 }
 
-void WmarkParserHelper::InitActions(RdParser& parser, RdParserActionMetaData* pData)
+void WmarkParserHelper::InitActions(RdParser& parser, RdParserActionMetaData& data)
 {
 	parser.ClearActions();
 	//accepted
-	parser.SetAcceptedAction(get_AcceptedAction(pData));
+	parser.SetAcceptedAction(get_AcceptedAction(data));
 	//program
-	parser.AddAction(WMARK_PARSER_ACT_program, get_ProgramAction(pData));
+	parser.AddAction(WMARK_PARSER_ACT_program, get_ProgramAction(data));
 	//TK_COMMENT
-	parser.AddAction(WMARK_PARSER_ACT_TK_COMMENT, get_TkCommentAction(pData));
+	parser.AddAction(WMARK_PARSER_ACT_TK_COMMENT, get_TkCommentAction(data));
 	//block_element
-	parser.AddAction(WMARK_PARSER_ACT_block_element, get_BlockElementAction(pData));
+	parser.AddAction(WMARK_PARSER_ACT_block_element, get_BlockElementAction(data));
 	//berr_tail
-	parser.AddAction(WMARK_PARSER_ACT_berr_tail, get_BerrTailAction(pData));
+	parser.AddAction(WMARK_PARSER_ACT_berr_tail, get_BerrTailAction(data));
 	//TK_TEXT
-	parser.AddAction(WMARK_PARSER_ACT_TK_TEXT, get_TkTextAction(pData));
+	parser.AddAction(WMARK_PARSER_ACT_TK_TEXT, get_TkTextAction(data));
 	//TK_INDENT
-	parser.AddAction(WMARK_PARSER_ACT_TK_INDENT, get_TkIndentAction(pData));
-}
-
-void WmarkParserHelper::Start(RdParser& parser)
-{
-	parser.Start(WMARK_SCANNER_TK_ACTION, WMARK_TK_MAX);
+	parser.AddAction(WMARK_PARSER_ACT_TK_INDENT, get_TkIndentAction(data));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
