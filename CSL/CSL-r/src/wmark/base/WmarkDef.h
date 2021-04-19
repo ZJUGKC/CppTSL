@@ -63,6 +63,21 @@ enum {
 //meta data
 #define WMARK_ROOT_SYMBOL  "document"
 
+/*
+Meta data:
+
+| Symbol     | data                        |
+|:-----------|:----------------------------|
+| "document" | Indirect AST start position |
+
+| AST node type            | data               | child    |
+|:-------------------------|:-------------------|:---------|
+| WMARK_NODETYPE_COMMENT   |                    |          |
+| WMARK_NODETYPE_PARAGRAPH |                    | inline   |
+| WMARK_NODETYPE_TEXT      | text               |          |
+| WMARK_NODETYPE_INDENT    |                    |          |
+*/
+
 ////////////////////////////////////////////////////////////////////////////////
 }
 ////////////////////////////////////////////////////////////////////////////////

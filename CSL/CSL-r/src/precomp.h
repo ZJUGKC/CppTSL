@@ -9,6 +9,7 @@
 
 #include "cslbase.h"
 #include "cslsys.h"
+#include "cslunit.h"
 
 #include "cslcrypt.h"
 

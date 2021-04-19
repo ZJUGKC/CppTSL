@@ -262,7 +262,7 @@ void FsPathHelper::ToPlatform(char* szBuffer) throw()
 bool FsPathHelper::GetHomeDirectory(std::string& str)
 {
 #ifdef WIN32
-	return EnvironmentVariableHelper::Get("HOMEPATH", str);
+	return EnvironmentVariableHelper::Get("USERPROFILE", str);
 #else
 	return EnvironmentVariableHelper::Get("HOME", str);
 #endif

@@ -193,6 +193,9 @@ bool RdaTable::generate_first_set(uint32_t uMaxTerminalID)
 		auto iterP(m_map.find(m_rules[index].pRule[0].uToken));
 		assert( iterP != m_map.end() );
 		//propagation
+		/*
+		terminals : left <-- (right, first item)
+		*/
 		for( auto iterF2 = iterF->second->mapTerminal.begin();
 			iterF2 != iterF->second->mapTerminal.end();
 			++ iterF2 ) {
@@ -248,6 +251,7 @@ bool RdaTable::add_follow_set(uint32_t uMaxTerminalID)
 				uint32_t uF = iter->pRule[uNext].uToken;
 				if( uF == TK_EPSILON )
 					return false;
+				//add terminal
 				if( uF <= uMaxTerminalID ) {
 					if( iterF->second->mapTerminal.find(uF) == iterF->second->mapTerminal.end() ) {
 						if( iterF->second->sFollow.find(uF) == iterF->second->sFollow.end() )
@@ -256,6 +260,9 @@ bool RdaTable::add_follow_set(uint32_t uMaxTerminalID)
 					break;
 				}
 				//NT
+				/*
+				first set of NT --> (right, current item)
+				*/
 				auto iterP(m_map.find(uF));
 				if( iterP == m_map.end() )
 					return false;
@@ -267,6 +274,7 @@ bool RdaTable::add_follow_set(uint32_t uMaxTerminalID)
 							iterF->second->sFollow.insert(iterF2->first);
 					}
 				}
+				//derive EPS
 				if( !(iterP->second->iEpsilon < 0) )
 					break;
 				uNext ++;
@@ -281,6 +289,9 @@ bool RdaTable::add_follow_set(uint32_t uMaxTerminalID)
 	iterF->second->sFollow.insert(TK_END_OF_EVENT);
 
 	//propagation
+	/*
+	construct propagation table
+	*/
 	PropMap mapProp;
 	std::vector<uint32_t> vecToDo;
 	iter = m_rules.begin();
@@ -294,6 +305,7 @@ bool RdaTable::add_follow_set(uint32_t uMaxTerminalID)
 				break;
 			iterF = m_map.find(uToken);
 			assert( iterF != m_map.end() );
+			//left --> (right, current item)
 			if( uToken != iter->pRule[0].uToken ) {
 				if( iterP == mapProp.end() ) {
 					auto ip = mapProp.insert(PropPair(iter->pRule[0].uToken, std::set<uint32_t>()));
@@ -303,6 +315,7 @@ bool RdaTable::add_follow_set(uint32_t uMaxTerminalID)
 				if( iterP->second.find(uToken) == iterP->second.end() )
 					iterP->second.insert(uToken);
 			}
+			//derive EPS
 			if( !(iterF->second->iEpsilon < 0) )
 				break;
 		}
@@ -322,6 +335,7 @@ bool RdaTable::add_follow_set(uint32_t uMaxTerminalID)
 			uint32_t uNT = *iterP2;
 			auto iterF2(m_map.find(uNT));
 			assert( iterF2 != m_map.end() );
+			//left --> (right, current item)
 			bool bChanged = false;
 			for( auto iterF3 = iterF->second->sFollow.begin();
 				iterF3 != iterF->second->sFollow.end();
@@ -534,7 +548,7 @@ int32_t RdParser::Parse()
 				return -2;
 			}
 			//accepted
-			if( m_rpaAccepted != nullptr ) {
+			if( !m_bEmpty && m_rpaAccepted != nullptr ) {
 				if( !m_rpaAccepted(m_token.strToken, m_vecError) )
 					return -2;
 			}

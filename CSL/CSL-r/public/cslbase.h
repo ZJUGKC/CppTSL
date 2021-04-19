@@ -29,6 +29,7 @@
 #include <stack>
 #include <map>
 #include <set>
+#include <unordered_map>
 
 #include <string>
 #include <cwchar>
@@ -44,6 +45,8 @@
 
 #include <thread>
 #include <chrono>
+
+#include <utility>
 
 //C++17
 #ifdef CPP_17
@@ -290,52 +293,6 @@ class StreamHelper
 public:
 	//return: true -- has UTF8 BOM
 	static bool CheckBOM_UTF8(std::istream& stm);
-};
-
-//test
-
-class TestBody
-{
-public:
-	//T : Lambda
-	template <typename T>
-	static bool Run(const T& t) throw()
-	{
-		try {
-			t();
-		}
-		catch(...) {
-			//**********
-			std::cout << "Exception error: (" << __FILE__ << ")(" << __LINE__ << ")" << std::endl;
-			//**********
-			return false;
-		}
-		return true;
-	}
-	static void Assert(bool bValue, const char* szFile, int iLineNum)
-	{
-		if( !bValue ) {
-			//**********
-			std::cout << "Assert error: (" << szFile << ")(" << iLineNum << ")" << std::endl;
-			//**********
-			throw std::exception();
-		}
-	}
-	//T : Lambda
-	template <typename T>
-	static void Exception(const T& t)
-	{
-		try {
-			t();
-		}
-		catch(...) {
-			//**********
-			std::cout << "Correct Exception : (" << __FILE__ << ")(" << __LINE__ << ")" << std::endl;
-			//**********
-			return ;
-		}
-		Assert(false, __FILE__, __LINE__);
-	}
 };
 
 //framework

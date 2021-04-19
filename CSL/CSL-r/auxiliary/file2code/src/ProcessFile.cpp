@@ -17,8 +17,8 @@ namespace CSL {
 static
 void write_h_file(std::ofstream& output, const char* szVar)
 {
-	output << "#ifndef __" << szVar << "_H__" << std::endl;
-	output << "#define __" << szVar << "_H__" << std::endl;
+	output << "#ifndef __FTSC_" << szVar << "_H__" << std::endl;
+	output << "#define __FTSC_" << szVar << "_H__" << std::endl;
 	output << "extern const unsigned char c_" << szVar << "[];" << std::endl;
 	output << "#endif" << std::endl;
 }

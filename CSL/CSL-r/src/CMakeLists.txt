@@ -13,7 +13,7 @@ INCLUDE_DIRECTORIES(
 
 SET(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
 SET(SRC_PCH_LIST "precomp.cpp")
-SET(SRC_LIST "cslbase.cpp" "cslsys.cpp" "cslcrypt.cpp" "cslrdp.cpp" "cslwmark.cpp"
+SET(SRC_LIST "cslbase.cpp" "cslsys.cpp" "cslunit.cpp" "cslcrypt.cpp" "cslrdp.cpp" "cslwmark.cpp"
 	"wmark/scanner_actions/tk_action.cpp" "wmark/scanner_actions/comment_action.cpp" "wmark/scanner_actions/text_action.cpp"
 	"wmark/parser_actions/accepted_action.cpp" "wmark/parser_actions/program_action.cpp" "wmark/parser_actions/tk_comment_action.cpp"
 	"wmark/parser_actions/block_element_action.cpp" "wmark/parser_actions/berr_tail_action.cpp" "wmark/parser_actions/tk_text_action.cpp"

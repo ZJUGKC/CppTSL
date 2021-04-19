@@ -120,22 +120,34 @@ bool WmarkHtmlGenerator::Generate(RdMetaData& data, std::ostream& stm)
 	//symbol
 	uint32_t uHash = data.CalcHash(WMARK_ROOT_SYMBOL);
 	RdMetaDataPosition pos = data.Find(WMARK_ROOT_SYMBOL, uHash);
+	//empty
 	if( pos.uAddress == 0 )
-		return false;
+		return true;
 	RdMetaDataPosition posRoot;
 	{
 		RdMetaDataInfo info;
 		bool bAnalysis;
 		data.GetInfo(pos, info, bAnalysis);
+		//empty
 		if( info.posData.uAddress == 0 )
-			return false;
+			return true;
 		posRoot = *((RdMetaDataPosition*)data.GetData(info.posData));
+		//empty
+		if( posRoot.uAddress == 0 )
+			return true;
 		posRoot = data.GetAstRoot(posRoot);
+		//empty
+		if( posRoot.uAddress == 0 )
+			return true;
 	} //end block
 	//ast
-	pos = posRoot;
+	RdMetaAstNodeInfo info;
+	data.GetAstNodeInfo(posRoot, info);
+	//empty
+	if( info.posChild.uAddress == 0 )
+		return true;
+	pos = info.posChild;
 	while( pos.uAddress != 0 ) {
-		RdMetaAstNodeInfo info;
 		data.GetAstNodeInfo(pos, info);
 		auto iter = m_map.find(info.uType);
 		if( iter != m_map.end() ) {
