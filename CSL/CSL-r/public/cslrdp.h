@@ -270,7 +270,7 @@ public:
 	void SetLevel(RdMetaDataPosition pos, uint32_t uLevel) throw();
 	void SetData(RdMetaDataPosition pos, RdMetaDataPosition posData) throw();
 	void ClearAnalysisFlag(RdMetaDataPosition pos) throw();
-	RdMetaDataPosition InsertSymbol(const char* szSymbol, uint32_t uType, bool bLevelLink);
+	RdMetaDataPosition InsertSymbol(const char* szSymbol, uint32_t uHashCode, uint32_t uType, bool bLevelLink);
 
 	void EnterLevel();
 	RdMetaDataPosition LeaveLevel(bool bReverseLevelLink) throw();

@@ -35,17 +35,17 @@ RdScannerAction WmarkScannerHelper::get_TkAction()
 
 				//return
 				if( ch == '\n' ) {
-					token.uID = WMARK_TK_RETURN;
 					token.infoEnd.uRow ++;
 					token.infoEnd.uCol = 0;
+					token.uID = WMARK_TK_RETURN;
 					return true;
 				}
 				if( ch == '\r' ) {
 					stm.get(ch);
 					if( stm.eof() ) {
-						token.uID = WMARK_TK_RETURN;
 						token.infoEnd.uRow ++;
 						token.infoEnd.uCol = 0;
+						token.uID = WMARK_TK_RETURN;
 						return true;
 					}
 					if( !stm.good() )

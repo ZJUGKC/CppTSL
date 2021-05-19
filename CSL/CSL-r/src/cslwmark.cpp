@@ -7,6 +7,7 @@
 #include "precomp.h"
 
 #include "wmark/base/WmarkDef.h"
+
 #include "wmark/WmarkScanner.h"
 #include "wmark/WmarkParser.h"
 #include "wmark/WmarkHtmlGenerator.h"

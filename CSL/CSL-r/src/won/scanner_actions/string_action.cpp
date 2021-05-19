@@ -1,14 +1,14 @@
 ﻿/*
-** Xin YUAN, 2019, BSD (2)
+** Xin YUAN, 2021, BSD (2)
 */
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "precomp.h"
 
-#include "../WmarkScanner.h"
+#include "../WonScanner.h"
 
-#include "../base/WmarkDef.h"
+#include "../base/WonDef.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -16,9 +16,9 @@
 namespace CSL {
 ////////////////////////////////////////////////////////////////////////////////
 
-// CommentAction
+// StringAction
 
-RdScannerAction WmarkScannerHelper::get_CommentAction()
+RdScannerAction WonScannerHelper::get_StringAction()
 {
 	return [](std::istream& stm, uint32_t& next, RdToken& token)->bool
 			{
@@ -28,84 +28,83 @@ RdScannerAction WmarkScannerHelper::get_CommentAction()
 					char ch;
 					stm.get(ch);
 					if( stm.eof() ) {
-						if( iState < 4 )
-							token.uID = WMARK_TK_TEXT;
-						else
-							token.uID = TK_ERROR;
+						token.uID = TK_ERROR;
 						return true;
 					}
 					if( !stm.good() )
 						return false;
-
 					token.strToken += ch;
 					token.infoEnd.uCol ++;
+
 					switch( iState ) {
 					case 1:
-						if( ch != '!' ) {
-							next = WMARK_SCANNER_TEXT_ACTION;
+						if( ch == '\"' ) {
+							iState = 7;
+						}
+						else if( ch == '\\' ) {
+							iState = 2;
+						}
+						else if( ch >= 0x00 && ch <= 0x1F ) {
+							token.uID = TK_ERROR;
 							return true;
 						}
-						iState = 2;
 						break;
 					case 2:
-						if( ch != '-' ) {
-							next = WMARK_SCANNER_TEXT_ACTION;
+						if( ::strchr("\"\\/bfnrt", ch) != NULL ) {
+							iState = 1;
+						}
+						else if( ch == 'u' ) {
+							iState = 3;
+						}
+						else {
+							token.uID = TK_ERROR;
 							return true;
 						}
-						iState = 3;
 						break;
 					case 3:
-						if( ch != '-' ) {
-							next = WMARK_SCANNER_TEXT_ACTION;
+						if( ::isxdigit(ch) ) {
+							iState = 4;
+						}
+						else {
+							token.uID = TK_ERROR;
 							return true;
 						}
-						iState = 4;
 						break;
 					case 4:
-						if( ch == '-' ) {
+						if( ::isxdigit(ch) ) {
 							iState = 5;
 						}
-						else if( ch == '\n' ) {
-							token.infoEnd.uRow ++;
-							token.infoEnd.uCol = 0;
-						}
-						else if( ch == '\r' ) {
-							stm.get(ch);
-							if( stm.eof() ) {
-								token.infoEnd.uRow ++;
-								token.infoEnd.uCol = 0;
-								token.uID = TK_ERROR;
-								return true;
-							}
-							if( !stm.good() )
-								return false;
-							token.infoEnd.uRow ++;
-							token.infoEnd.uCol = 0;
-							if( ch == '\n' )
-								token.strToken += ch;
-							else
-								stm.unget();
+						else {
+							token.uID = TK_ERROR;
+							return true;
 						}
 						break;
 					case 5:
-						if( ch != '-' )
-							iState = 4;
-						else
+						if( ::isxdigit(ch) ) {
 							iState = 6;
+						}
+						else {
+							token.strToken.erase(token.strToken.size() - 1, 1);
+							token.infoEnd.uCol --;
+							stm.unget();
+							iState = 1;
+						}
 						break;
 					case 6:
-						if( ch != '>' )
-							iState = 4;
-						else
-							iState = 7;
+						if( ::isxdigit(ch) ) {
+							iState = 1;
+						}
+						else {
+							token.uID = TK_ERROR;
+							return true;
+						}
 						break;
 					default:
 						return false;
 					}
 				} while( iState != 7 );
 
-				//comment
-				token.uID = WMARK_TK_COMMENT;
+				token.uID = WON_TK_STRING;
 				return true;
 			};
 }

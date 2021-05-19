@@ -23,7 +23,8 @@ RdParserAction WmarkParserHelper::get_AcceptedAction(RdParserActionMetaData& dat
 	return [&data](const std::string& strToken, std::vector<std::string>& vecError)->bool
 			{
 				//symbol
-				RdMetaDataPosition pos = data.spMeta->InsertSymbol(WMARK_ROOT_SYMBOL, 0, true);
+				uint32_t uHash = data.spMeta->CalcHash(WMARK_ROOT_SYMBOL);
+				RdMetaDataPosition pos = data.spMeta->InsertSymbol(WMARK_ROOT_SYMBOL, uHash, 0, true);
 				RdMetaDataPosition posData = data.spMeta->InsertData(sizeof(RdMetaDataPosition));
 				*((RdMetaDataPosition*)(data.spMeta->GetData(posData))) = data.spMeta->GetAstStart();
 				data.spMeta->SetData(pos, posData);

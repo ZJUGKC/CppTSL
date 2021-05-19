@@ -604,6 +604,7 @@ int32_t RdParser::Parse()
 			}
 			//pop
 			m_stack.pop();
+			break;
 		}
 	} //end while
 
@@ -828,10 +829,9 @@ void RdMetaData::ClearAnalysisFlag(RdMetaDataPosition pos) throw()
 	p->uLevel &= (~MASK_ANALYSIS);
 }
 
-RdMetaDataPosition RdMetaData::InsertSymbol(const char* szSymbol, uint32_t uType, bool bLevelLink)
+RdMetaDataPosition RdMetaData::InsertSymbol(const char* szSymbol, uint32_t uHashCode, uint32_t uType, bool bLevelLink)
 {
 	assert( szSymbol != nullptr );
-	uint32_t uHashCode = CalcHash(szSymbol);
 	//allocate
 	if( m_uSymbolStart == 0 ) {
 		uint32_t uBytes = sizeof(uint32_t) + m_uBins * sizeof(uint32_t);
@@ -985,11 +985,18 @@ void RdMetaData::SetAstParent(RdMetaDataPosition pos, RdMetaDataPosition posPare
 {
 	assert( pos.uAddress != 0 );
 	_AstNode* pNode = (_AstNode*)m_raAst.ToPointer(pos.uAddress);
+	if( posParent.uAddress == 0 ) {
+		posParent = GetAstRoot(GetAstStart());
+		assert( posParent.uAddress != 0 );
+	}
 	pNode->uParent = posParent.uAddress;
 }
 void RdMetaData::SetAstChild(RdMetaDataPosition pos, RdMetaDataPosition posChild) throw()
 {
-	assert( pos.uAddress != 0 );
+	if( pos.uAddress == 0 ) {
+		pos = GetAstRoot(GetAstStart());
+		assert( pos.uAddress != 0 );
+	}
 	_AstNode* pNode = (_AstNode*)m_raAst.ToPointer(pos.uAddress);
 	pNode->uChild = posChild.uAddress;
 }
