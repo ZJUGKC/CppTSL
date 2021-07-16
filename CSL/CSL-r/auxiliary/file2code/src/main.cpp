@@ -34,6 +34,12 @@ static
 int _cmd_process_file(const char* szSrc, const char* szDest, bool bCpp)
 {
 	size_t uPos = CSL::FsPathHelper::FindFilePart(szDest);
+	//check length of file part
+	if ( uPos == ::strlen(szDest) ) {
+		std::cout << "Error : The destination file name should be a C variable name!" << std::endl;
+		return 1;
+	}
+	//check name
 	const char* sz = szDest + uPos;
 	while ( *sz != '\0' ) {
 		char ch = *sz;
@@ -43,6 +49,7 @@ int _cmd_process_file(const char* szSrc, const char* szDest, bool bCpp)
 		}
 		sz ++;
 	}
+	//process
 	return CSL::ProcessFile(szSrc, szDest, szDest + uPos, bCpp) ? 0 : 1;
 }
 

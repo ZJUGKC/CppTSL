@@ -259,6 +259,20 @@ void FsPathHelper::ToPlatform(char* szBuffer) throw()
 #endif
 }
 
+bool FsPathHelper::GetCurrentDirectory(std::string& str)
+{
+	str.resize(MAX_FULL_PATH);
+#ifdef WIN32
+	char* p = ::_getcwd(&str.front(), MAX_FULL_PATH);
+#else
+	char* p = ::getcwd(&str.front(), MAX_FULL_PATH);
+#endif
+	if ( p == NULL )
+		return false;
+	str.resize(::strlen(p));
+	return true;
+}
+
 bool FsPathHelper::GetHomeDirectory(std::string& str)
 {
 #ifdef WIN32
@@ -314,13 +328,16 @@ bool FsPathHelper::IsPathSeparator(char ch) noexcept
 void FsPathHelper::AppendSeparator(std::string& str)
 {
 	size_t n = str.size();
-	if ( n == 0 || !IsPathSeparator(str[n - 1]) )
+	if ( n == 0 )
+		return ;
+	if ( !(n != 0 && (IsPathSeparator(str[n - 1]) || IsDriveSeparator(str[n - 1]))) )
 		str += '/';
 }
 void FsPathHelper::RemoveSeparator(std::string& str)
 {
 	size_t n = str.size();
-	if ( n != 0 && IsPathSeparator(str[n - 1]) )
+	if ( n != 0 && IsPathSeparator(str[n - 1])
+		&& n > 1 && !IsDriveSeparator(str[n - 2]) )
 		str.erase(n - 1, 1);
 }
 
@@ -421,6 +438,9 @@ bool StreamHelper::CheckBOM_UTF8(std::istream& stm)
 	bool bRet = false;
 	uint8_t buf[3];
 	stm.read((char*)buf, 3);
+	//eof may be set
+	if( !stm.eof() && !stm.good() )
+		return bRet;
 	std::streamsize n = stm.gcount();
 	int32_t iBack = 0;
 	if( n == 3 ) {

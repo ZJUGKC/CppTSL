@@ -146,7 +146,8 @@ MACRO(UNIX_SET_PCH targetName IsShared pchHeader pchSource)
 	ADD_CUSTOM_COMMAND(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_name}
 		COMMAND ${CMAKE_COMMAND} -E copy ${_input}
-			${CMAKE_CURRENT_BINARY_DIR}/${_name})
+			${CMAKE_CURRENT_BINARY_DIR}/${_name}
+		DEPENDS ${_input})
 	#Generate PCH
 	ADD_CUSTOM_COMMAND(OUTPUT ${_output}
 		COMMAND ${CMAKE_CXX_COMPILER} ${_compile_FLAGS}
@@ -197,22 +198,31 @@ ENDMACRO(SET_PCH)
 
 ###############################################################################
 
-# Post Building
+# Additional target command
 
-MACRO(SET_POSTBUILD_CMD targetName strCmd)
-	ADD_CUSTOM_COMMAND(TARGET ${targetName} POST_BUILD
-					COMMAND ${strCmd} ${ARGN})
-ENDMACRO(SET_POSTBUILD_CMD)
+MACRO(SET_TARGET_CMD targetName isPostBuilding strCmd)
+	IF(${isPostBuilding})
+		ADD_CUSTOM_COMMAND(TARGET ${targetName} POST_BUILD
+						COMMAND ${strCmd} ${ARGN})
+	ELSE(${isPostBuilding})
+		ADD_CUSTOM_COMMAND(TARGET ${targetName} PRE_BUILD
+						COMMAND ${strCmd} ${ARGN})
+	ENDIF(${isPostBuilding})
+ENDMACRO(SET_TARGET_CMD)
 
-MACRO(SET_POSTBUILD_MKDIR targetName strDir)
+MACRO(SET_TARGET_MKDIR targetName isPostBuilding strDir)
 	SET(_source "${strDir}")
 	IF(WIN32)
 		STRING(REPLACE "/" "\\\\" _source ${_source})
 	ENDIF(WIN32)
-	SET_POSTBUILD_CMD(${targetName} mkdir ${_source})
-ENDMACRO(SET_POSTBUILD_MKDIR)
+	IF(WIN32)
+		SET_TARGET_CMD(${targetName} ${isPostBuilding} dir /a ${_source} "1>nul" "2>nul" "||" mkdir ${_source})
+	ELSE(WIN32)
+		SET_TARGET_CMD(${targetName} ${isPostBuilding} mkdir -p ${_source})
+	ENDIF(WIN32)
+ENDMACRO(SET_TARGET_MKDIR)
 
-MACRO(SET_POSTBUILD_COPY targetName strSrc strDest)
+MACRO(SET_TARGET_COPY targetName isPostBuilding strSrc strDest)
 	SET(_source "${strSrc}")
 	SET(_dest "${strDest}")
 	IF(WIN32)
@@ -220,11 +230,11 @@ MACRO(SET_POSTBUILD_COPY targetName strSrc strDest)
 		STRING(REPLACE "/" "\\\\" _dest ${_dest})
 	ENDIF(WIN32)
 	IF(WIN32)
-		SET_POSTBUILD_CMD(${targetName} copy "/Y" ${_source} ${_dest})
+		SET_TARGET_CMD(${targetName} ${isPostBuilding} copy "/Y" ${_source} ${_dest})
 	ENDIF(WIN32)
 	IF(CMAKE_COMPILER_IS_GNUCXX)
-		SET_POSTBUILD_CMD(${targetName} cp -pdf ${_source} ${_dest})
+		SET_TARGET_CMD(${targetName} ${isPostBuilding} cp -pdf ${_source} ${_dest})
 	ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-ENDMACRO(SET_POSTBUILD_COPY)
+ENDMACRO(SET_TARGET_COPY)
 
 # end

@@ -262,6 +262,8 @@ class FsPathHelper
 {
 public:
 	static void ToPlatform(char* szBuffer) throw();
+
+	static bool GetCurrentDirectory(std::string& str);
 	static bool GetHomeDirectory(std::string& str);
 	static bool GetExePathName(std::string& str);
 
